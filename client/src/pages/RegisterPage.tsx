@@ -1,38 +1,38 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import api from "../services/api";
 
 function RegisterPage() {
     const navigate = useNavigate();
+    const { login } = useAuth();
+    const { showToast } = useToast();
 
-    const [email, setEmail] =
-        useState("");
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    const [password, setPassword] =
-        useState("");
-
-    const handleRegister = async (
-        e: React.FormEvent
-    ) => {
+    const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true);
 
         try {
-            const res = await api.post(
-                "/auth/register",
-                {
-                    email,
-                    password,
-                }
-            );
+            const res = await api.post("/auth/register", {
+                name,
+                email,
+                password,
+            });
 
-            localStorage.setItem(
-                "token",
-                res.data.token
-            );
-
+            login(res.data.token, res.data.user);
+            showToast("Registration successful!", "success");
             navigate("/dashboard");
-        } catch (error) {
-            alert("Registration failed");
+        } catch (error: any) {
+            const message = error.response?.data?.message || "Registration failed";
+            showToast(message, "error");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -47,13 +47,21 @@ function RegisterPage() {
                 </h1>
 
                 <input
+                    type="text"
+                    placeholder="Full Name"
+                    className="w-full border p-3 rounded mb-4"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                />
+
+                <input
                     type="email"
                     placeholder="Email"
                     className="w-full border p-3 rounded mb-4"
                     value={email}
-                    onChange={(e) =>
-                        setEmail(e.target.value)
-                    }
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
                 />
 
                 <input
@@ -61,16 +69,23 @@ function RegisterPage() {
                     placeholder="Password"
                     className="w-full border p-3 rounded mb-4"
                     value={password}
-                    onChange={(e) =>
-                        setPassword(e.target.value)
-                    }
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
                 />
 
                 <button
-                    className="w-full bg-black text-white p-3 rounded"
+                    disabled={loading}
+                    className="w-full bg-black text-white p-3 rounded disabled:opacity-50"
                 >
-                    Register
+                    {loading ? "Registering..." : "Register"}
                 </button>
+
+                <p className="mt-4 text-center text-sm text-gray-600">
+                    Already have an account?{" "}
+                    <a href="/login" className="text-blue-600 hover:underline">
+                        Login here
+                    </a>
+                </p>
             </form>
         </div>
     );

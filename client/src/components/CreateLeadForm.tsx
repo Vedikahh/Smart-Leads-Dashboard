@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useToast } from "../context/ToastContext";
 import api from "../services/api";
 
 interface Props {
@@ -8,22 +9,18 @@ interface Props {
 function CreateLeadForm({
     onSuccess,
 }: Props) {
-    const [name, setName] =
-        useState("");
-
-    const [email, setEmail] =
-        useState("");
-
-    const [status, setStatus] =
-        useState("New");
-
-    const [source, setSource] =
-        useState("Website");
+    const { showToast } = useToast();
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [status, setStatus] = useState("New");
+    const [source, setSource] = useState("Website");
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (
         e: React.FormEvent
     ) => {
         e.preventDefault();
+        setLoading(true);
 
         try {
             await api.post("/leads", {
@@ -35,10 +32,13 @@ function CreateLeadForm({
 
             setName("");
             setEmail("");
-
+            showToast("Lead created successfully!", "success");
             onSuccess();
-        } catch (error) {
-            console.log(error);
+        } catch (error: any) {
+            const message = error.response?.data?.message || "Failed to create lead";
+            showToast(message, "error");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -55,6 +55,7 @@ function CreateLeadForm({
                 onChange={(e) =>
                     setName(e.target.value)
                 }
+                required
             />
 
             <input
@@ -65,6 +66,7 @@ function CreateLeadForm({
                 onChange={(e) =>
                     setEmail(e.target.value)
                 }
+                required
             />
 
             <select
@@ -98,9 +100,10 @@ function CreateLeadForm({
             </select>
 
             <button
-                className="bg-black text-white p-3 rounded md:col-span-4"
+                disabled={loading}
+                className="bg-black text-white p-3 rounded md:col-span-4 disabled:opacity-50"
             >
-                Create Lead
+                {loading ? "Creating..." : "Create Lead"}
             </button>
         </form>
     );

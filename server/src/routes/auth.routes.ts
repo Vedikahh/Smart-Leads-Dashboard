@@ -9,9 +9,9 @@ import {
 const router = express.Router();
 
 router.get("/me", protect, (req, res) => {
-    res.json({
+    res.status(200).json({
         success: true,
-        message: "Protected route working",
+        user: req.user,
     });
 });
 
