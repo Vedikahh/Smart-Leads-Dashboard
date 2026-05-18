@@ -6,6 +6,19 @@ import {
     registerUser,
 } from "../controllers/auth.controller";
 
+import { Request } from "express";
+
+declare global {
+    namespace Express {
+        interface Request {
+            user?: {
+                id: string;
+                role: string;
+            };
+        }
+    }
+}
+
 const router = express.Router();
 
 router.get("/me", protect, (req, res) => {

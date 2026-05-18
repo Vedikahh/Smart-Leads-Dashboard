@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Lead from "../models/lead.model";
 import { AuthRequest } from "../middleware/auth.middleware";
+import { SortOrder } from "mongoose";
 
 export const createLead = async (
     req: AuthRequest,
@@ -72,10 +73,7 @@ export const getLeads = async (
         const skip =
             (Number(page) - 1) * limit;
 
-        const sortOption =
-            sort === "oldest"
-                ? { createdAt: 1 }
-                : { createdAt: -1 };
+        const sortOption: Record<string, 1 | -1> = sort === "oldest" ? { createdAt: 1 } : { createdAt: -1 };
 
         const total = await Lead.countDocuments(query);
 

@@ -6,6 +6,8 @@ export interface ILead {
     status: "New" | "Contacted" | "Qualified" | "Lost";
     source: "Website" | "Instagram" | "Referral";
     createdBy: mongoose.Types.ObjectId;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 const leadSchema = new Schema<ILead>(
